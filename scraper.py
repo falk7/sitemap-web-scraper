@@ -1,22 +1,34 @@
 from bs4 import BeautifulSoup
-# from xml.etree.ElementTree import parse
-from defusedxml.ElementTree import parse
+import re
+import requests
 
 # 1. scrape sitemap.xml & get all urls
-def scrapeSitemap(sitemap_file):
+def scrape_sitemap():
     """
     scrapes sitemap and collects any links
     """
-    et = parse(sitemap_file)
-    root = et.getroot()
-    # print(dir(root))
-    # print(dir(root[0][0]))
 
-    print(root.findall("./loc"))
-    print(root[0][0].text)
-    # for child in root:
-    #     print("newCh")
-    #     print(child.tag, child.attrib)
+    string = '''
+    <?xml version="1.0" encoding="UTF-8"?> 
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        <url> 
+        <loc>https://www.example.com/examplea</loc> 
+        <priority>0.5</priority> 
+        <lastmod>2019-03-14</lastmod> 
+        <changefreq>daily</changefreq> 
+    </url> 
+    <url> 
+        <loc>https://www.example.com/exampleb</loc> 
+        <priority>0.5</priority> 
+        <lastmod>2019-03-14</lastmod> 
+        <changefreq>daily</changefreq> 
+    </url> 
+    </urlset>
+    '''
+
+    pattern = '(?<=<loc>)[a-zA-z]+://[^\s]*(?=</loc>)'
+
+    return re.findall(pattern,string)
 
 
 # 2. save new urls to queue - no doubles
@@ -24,15 +36,22 @@ def scrapeSitemap(sitemap_file):
 # 3. save scraped urls to done - no doubles
 
 # 4. scan all urls from queue for javascript and further urls 
-def scrapeUrl(url):
+def scrape_url(url):
     """
     scrapes url for js and other urls
     """
-    soup = BeautifulSoup("<p>Some<b>bad<i>HTML")
-    print(soup.prettify())
-    pass
+    req = requests.get(url)
+    soup = BeautifulSoup(req.content, 'html.parser')
+    scraped_urls.append(url)
+
 
 if __name__ == "__main__":
-    scrapeSitemap("sitemap.xml")
-    # scrapeUrl("any")
+
+    ### funktionen funktional implementieren?!?!
+    urls_queue = scrape_sitemap()
+    scraped_urls = []
+
+    while len(urls_queue) > 0:
+        scrape_url(urls_queue.pop())
     
+    print(scraped_urls)
