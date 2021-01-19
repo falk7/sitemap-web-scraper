@@ -31,7 +31,27 @@ def scrape_sitemap():
     return re.findall(pattern,string)
 
 
+def get_queue():
+    """
+    gets queue from file. Creates new list if no file available
+    """
+    return []
+
+def get_scraped():
+    """
+    returns scraped urls from file. Creates new list if no file available
+    """
+    return []
+
 # 2. save new urls to queue - no doubles
+def is_known_url(url, queue, scraped):
+    """
+    returns true if url is known
+    """
+    in_queue = url in queue
+    in_scraped = url in scraped
+
+    return in_queue or in_scraped 
 
 # 3. save scraped urls to done - no doubles
 
@@ -46,10 +66,13 @@ def scrape_url(url):
 
 
 if __name__ == "__main__":
+    urls_queue = get_queue()
+    scraped_urls = get_scraped()
 
     ### funktionen funktional implementieren?!?!
-    urls_queue = scrape_sitemap()
-    scraped_urls = []
+    for url in scrape_sitemap():
+        if not is_known_url(url, urls_queue, scraped_urls):
+            urls_queue.append(url)
 
     while len(urls_queue) > 0:
         scrape_url(urls_queue.pop())
